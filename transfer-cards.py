@@ -1,6 +1,7 @@
 import tensorflow as tf
 import tensorflow.keras.utils as utils
-import tensorflow.keras.applications.resnet50 as resnet50
+# import tensorflow.keras.applications.resnet50 as resnet50
+import tensorflow.keras.applications.vgg16 as vgg16
 import tensorflow.keras as keras
 import tensorflow.keras.layers as layers
 import tensorflow.keras.optimizers as optimizers
@@ -22,22 +23,22 @@ import os
 # 			print("Input must be an int between 1 and 3")
 
 def createModel():
-	resnet = resnet50.ResNet50(
+	netModel = vgg16.VGG16(
 		include_top = True,
 		weights = 'imagenet',
 		classifier_activation = 'softmax',
 	)
 
-	print(f"resnet = {resnet}")
+	print(f"netModel = {netModel}")
 
-	resnet.trainable = False
+	netModel.trainable = False
 
 	inputs = keras.Input(shape = (224, 224, 3))
 	
-	outputs = resnet(inputs)
+	outputs = netModel(inputs)
 	outputs = layers.Dense(53, activation = 'softmax')(outputs)
 
-	optimizer = optimizers.legacy.Adam(learning_rate = 0.00001)
+	optimizer = optimizers.legacy.Adam(learning_rate = 0.0001)
 	loss = losses.CategoricalCrossentropy()
 
 	model = keras.Model(inputs, outputs)
@@ -58,7 +59,7 @@ def evaluate(model, train, validation, checkpointPath):
 	history = model.fit(
 		train,
 		batch_size = 32,
-		epochs = 1,
+		epochs = 66,
 		verbose = 1,
 		validation_data = validation,
 		validation_batch_size = 32,
@@ -73,14 +74,22 @@ def evaluate(model, train, validation, checkpointPath):
 		"val_loss": []
 	}
 
-	with open("modelInfo.json", 'r') as modelInfo:
-		pasHist = json.load(modelInfo)
+	try:
+		with open("modelInfo.json", 'r') as modelInfo:
+			pastHist = json.load(modelInfo)
+	except (FileNotFoundError, json.decoder.JSONDecodeError):
+		pass
 	
 	if pastHist is not None:
 		pastHist["accuracy"] += history.history["accuracy"]
 		pastHist["loss"] += history.history["loss"]
 		pastHist["val_accuracy"] += history.history["val_accuracy"]
 		pastHist["val_loss"] += history.history["val_loss"]
+	else:
+		pastHist["accuracy"] = history.history["accuracy"]
+		pastHist["loss"] = history.history["loss"]
+		pastHist["val_accuracy"] = history.history["val_accuracy"]
+		pastHist["val_loss"] = history.history["val_loss"]
 
 	with open("modelInfo.json", 'w') as modelInfo:
 		json.dump(pastHist, modelInfo, indent=4)
@@ -104,8 +113,8 @@ def main():
 	print(train)
 	print(validation)
 
-	train = train.map(lambda x, y: (resnet50.preprocess_input(x), y))
-	validation = validation.map(lambda x, y: (resnet50.preprocess_input(x), y))
+	train = train.map(lambda x, y: (vgg16.preprocess_input(x), y))
+	validation = validation.map(lambda x, y: (vgg16.preprocess_input(x), y))
 
 	checkpointPath = "C:/Users/Jonas/OneDrive/Desktop/2023-2024/Advanced-Honors-Comp-Sci/transfer-learning-project/checkpoints"
 	checkpointDir = os.path.dirname(checkpointPath)
@@ -114,11 +123,11 @@ def main():
 
 	model = createModel()
 
-	# print("\n\n\nBlank Model")
+	# print("\n\nBlank Model")
 	# evaluate(model, train, validation, checkpointPath)
 	checkpoint = Checkpoint(model)
 
-	# print("\n\n\nLoaded Weights")
+	print("\n\n\nLoaded Weights")
 	checkpoint.restore(checkpointPath)
 	model.load_weights(checkpointPath)
 	history = evaluate(model, train, validation, checkpointPath)
