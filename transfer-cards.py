@@ -58,7 +58,7 @@ def evaluate(model, train, validation, checkpointPath):
 	history = model.fit(
 		train,
 		batch_size = 32,
-		epochs = 117,
+		epochs = 1,
 		verbose = 1,
 		validation_data = validation,
 		validation_batch_size = 32,
@@ -77,10 +77,10 @@ def evaluate(model, train, validation, checkpointPath):
 		pasHist = json.load(modelInfo)
 	
 	if pastHist is not None:
-		pastHist["accuracy"].append(history.history["accuracy"])
-		pastHist["loss"].append(history.history["loss"])
-		pastHist["val_accuracy"].append(history.history["val_accuracy"])
-		pastHist["val_loss"].append(history.history["val_loss"])
+		pastHist["accuracy"] += history.history["accuracy"]
+		pastHist["loss"] += history.history["loss"]
+		pastHist["val_accuracy"] += history.history["val_accuracy"]
+		pastHist["val_loss"] += history.history["val_loss"]
 
 	with open("modelInfo.json", 'w') as modelInfo:
 		json.dump(pastHist, modelInfo, indent=4)
