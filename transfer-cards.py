@@ -7,6 +7,7 @@ import tensorflow.keras.layers as layers
 import tensorflow.keras.optimizers as optimizers
 import tensorflow.keras.losses as losses
 from tensorflow.train import Checkpoint
+import argparse
 import json
 import os
 
@@ -59,7 +60,7 @@ def evaluate(model, train, validation, checkpointPath):
 	history = model.fit(
 		train,
 		batch_size = 32,
-		epochs = 66,
+		epochs = 97,
 		verbose = 1,
 		validation_data = validation,
 		validation_batch_size = 32,
@@ -98,6 +99,13 @@ def evaluate(model, train, validation, checkpointPath):
 
 def main():
 
+	ap = argparse.ArgumentParser()
+	ap.add_argument("-l", "--load", required=False, help="Path to load save")
+	ap.add_argument("-n", "--save", required=False, help="Path to where to save model")
+	args = vars(ap.parse_args())
+
+	checkpointPath = args["load"]
+
 	train = utils.image_dataset_from_directory(
 		'train',
 		label_mode = 'categorical',
@@ -116,18 +124,14 @@ def main():
 	train = train.map(lambda x, y: (vgg16.preprocess_input(x), y))
 	validation = validation.map(lambda x, y: (vgg16.preprocess_input(x), y))
 
-	checkpointPath = "C:/Users/Jonas/OneDrive/Desktop/2023-2024/Advanced-Honors-Comp-Sci/transfer-learning-project/checkpoints"
 	checkpointDir = os.path.dirname(checkpointPath)
 
 	os.listdir(checkpointDir)
 
 	model = createModel()
 
-	# print("\n\nBlank Model")
-	# evaluate(model, train, validation, checkpointPath)
 	checkpoint = Checkpoint(model)
 
-	print("\n\n\nLoaded Weights")
 	checkpoint.restore(checkpointPath)
 	model.load_weights(checkpointPath)
 	history = evaluate(model, train, validation, checkpointPath)
