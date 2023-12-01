@@ -60,7 +60,7 @@ def evaluate(model, train, validation, checkpointPath):
 	history = model.fit(
 		train,
 		batch_size = 32,
-		epochs = 97,
+		epochs = 60,
 		verbose = 1,
 		validation_data = validation,
 		validation_batch_size = 32,
