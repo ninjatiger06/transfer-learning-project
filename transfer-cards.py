@@ -60,7 +60,7 @@ def evaluate(model, train, validation, checkpointPath, infoPath):
 	history = model.fit(
 		train,
 		batch_size = 32,
-		epochs = 60,
+		epochs = 1,
 		verbose = 1,
 		validation_data = validation,
 		validation_batch_size = 32,
@@ -101,7 +101,7 @@ def main():
 
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-l", "--load", required=False, help="Path to load save")
-	ap.add_argument("-n", "--save", required=False, help="Path to where to save model")
+	ap.add_argument("-s", "--save", required=False, help="Path to where to save model")
 	ap.add_argument("-p", "--data", required=True, help="Path to where to save model info")
 	args = vars(ap.parse_args())
 
@@ -136,6 +136,8 @@ def main():
 
 		checkpoint.restore(checkpointPath)
 		model.load_weights(checkpointPath)
+	else:
+		checkpointPath = args["save"]
 
 	history = evaluate(model, train, validation, checkpointPath, infoPath)
 
