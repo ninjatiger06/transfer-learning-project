@@ -52,7 +52,7 @@ def createModel():
 
 	return model
 
-def evaluate(model, train, validation, checkpointPath):
+def evaluate(model, train, validation, checkpointPath, infoPath):
 	cpCallback = tf.keras.callbacks.ModelCheckpoint(filepath = checkpointPath,
 													save_weights_only = True,
 													verbose = 1)
@@ -76,7 +76,7 @@ def evaluate(model, train, validation, checkpointPath):
 	}
 
 	try:
-		with open("modelInfo.json", 'r') as modelInfo:
+		with open(infoPath, 'r') as modelInfo:
 			pastHist = json.load(modelInfo)
 	except (FileNotFoundError, json.decoder.JSONDecodeError):
 		pass
@@ -92,7 +92,7 @@ def evaluate(model, train, validation, checkpointPath):
 		pastHist["val_accuracy"] = history.history["val_accuracy"]
 		pastHist["val_loss"] = history.history["val_loss"]
 
-	with open("modelInfo.json", 'w') as modelInfo:
+	with open(infoPath, 'w') as modelInfo:
 		json.dump(pastHist, modelInfo, indent=4)
 
 	return history
@@ -102,9 +102,10 @@ def main():
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-l", "--load", required=False, help="Path to load save")
 	ap.add_argument("-n", "--save", required=False, help="Path to where to save model")
+	ap.add_argument("-p", "--data", required=True, help="Path to where to save model info")
 	args = vars(ap.parse_args())
 
-	checkpointPath = args["load"]
+	infoPath = args["data"]
 
 	train = utils.image_dataset_from_directory(
 		'train',
@@ -124,17 +125,19 @@ def main():
 	train = train.map(lambda x, y: (vgg16.preprocess_input(x), y))
 	validation = validation.map(lambda x, y: (vgg16.preprocess_input(x), y))
 
-	checkpointDir = os.path.dirname(checkpointPath)
-
-	os.listdir(checkpointDir)
-
 	model = createModel()
 
 	checkpoint = Checkpoint(model)
 
-	checkpoint.restore(checkpointPath)
-	model.load_weights(checkpointPath)
-	history = evaluate(model, train, validation, checkpointPath)
+	if args["load"] != None:
+		checkpointPath = args["load"]
+		checkpointDir = os.path.dirname(checkpointPath)
+		os.listdir(checkpointDir)
+
+		checkpoint.restore(checkpointPath)
+		model.load_weights(checkpointPath)
+
+	history = evaluate(model, train, validation, checkpointPath, infoPath)
 
 
 main()
