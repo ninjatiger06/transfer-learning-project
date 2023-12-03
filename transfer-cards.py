@@ -52,7 +52,7 @@ def createModel():
 
 	return model
 
-def evaluate(model, train, validation, checkpointPath, infoPath):
+def evaluate(model, train, validation, epochs, checkpointPath, infoPath):
 	cpCallback = tf.keras.callbacks.ModelCheckpoint(filepath = checkpointPath,
 													save_weights_only = True,
 													verbose = 1)
@@ -60,7 +60,7 @@ def evaluate(model, train, validation, checkpointPath, infoPath):
 	history = model.fit(
 		train,
 		batch_size = 32,
-		epochs = 1,
+		epochs = epochs,
 		verbose = 1,
 		validation_data = validation,
 		validation_batch_size = 32,
@@ -101,11 +101,13 @@ def main():
 
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-l", "--load", required=False, help="Path to load save")
-	ap.add_argument("-s", "--save", required=False, help="Path to where to save model")
+	ap.add_argument("-n", "--save", required=False, help="Path to where to save model")
 	ap.add_argument("-p", "--data", required=True, help="Path to where to save model info")
+	ap.add_argument("-e", "--epochs", required=True, help="Number of epochs for model to run")
 	args = vars(ap.parse_args())
 
 	infoPath = args["data"]
+	epochs = int(args["epochs"])
 
 	train = utils.image_dataset_from_directory(
 		'train',
@@ -139,7 +141,7 @@ def main():
 	else:
 		checkpointPath = args["save"]
 
-	history = evaluate(model, train, validation, checkpointPath, infoPath)
+	history = evaluate(model, train, validation, epochs, checkpointPath, infoPath)
 
 
 main()
