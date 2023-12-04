@@ -1,3 +1,10 @@
+"""
+	Description: Takes a file with data from training a model (loss, accuracy,
+				 val_loss & val_accuracy) and displays on graphs
+	Author: Jonas Pfefferman '24
+	Date: 11/17/2023
+"""
+
 import json
 import matplotlib.pyplot as plt
 import argparse
@@ -8,7 +15,7 @@ args = vars(ap.parse_args())
 path = args["path"]
 
 with open(path, 'r') as modelInfo:
-    info = json.load(modelInfo)
+	info = json.load(modelInfo)
 
 plt.plot(range(1, len(info["loss"])+1), info["loss"], 'b', label="training loss")
 plt.plot(range(1, len(info["val_loss"])+1), info["val_loss"], 'r', label="val_loss")

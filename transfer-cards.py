@@ -1,3 +1,10 @@
+"""
+	Description: Takes a pre-existing model and transfers it to train on a dataset
+				 (in this case a deck of cards)
+	Author: Jonas Pfefferman '24
+	Date: 11/17/2023
+"""
+
 import tensorflow as tf
 import tensorflow.keras.utils as utils
 # import tensorflow.keras.applications.resnet50 as resnet50
@@ -24,6 +31,11 @@ import os
 # 			print("Input must be an int between 1 and 3")
 
 def createModel():
+	"""
+	Purpose: Establishes a new model, including its inputs, outputs, losses, and optimizer
+	Parameters: None
+	Returns: The model as a model object
+	"""
 	netModel = vgg16.VGG16(
 		include_top = True,
 		weights = 'imagenet',
@@ -53,6 +65,14 @@ def createModel():
 	return model
 
 def evaluate(model, train, validation, epochs, checkpointPath, infoPath):
+	"""
+	Purpose: Fits a given model to a given data set
+	Parameters: The model (as a model object), training data (image dataset),
+				validation (image dataset), number of epochs to run (int),
+				where to save checkpoints (str of directory path), and where
+				to save loss/accuracy data (str of path to json)
+	Returns:
+	"""
 	cpCallback = tf.keras.callbacks.ModelCheckpoint(filepath = checkpointPath,
 													save_weights_only = True,
 													verbose = 1)
