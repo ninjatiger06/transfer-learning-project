@@ -5,6 +5,7 @@
 	Date: 11/17/2023
 """
 
+from __future__ import annotations
 import tensorflow as tf
 import tensorflow.keras.utils as utils
 # import tensorflow.keras.applications.resnet50 as resnet50
@@ -30,7 +31,7 @@ import os
 # 		except ValueError:
 # 			print("Input must be an int between 1 and 3")
 
-def createModel():
+def createModel() -> keras.engine.functional.Functional:
 	"""
 	Purpose: Establishes a new model, including its inputs, outputs, losses, and optimizer
 	Parameters: None
@@ -64,15 +65,21 @@ def createModel():
 
 	return model
 
-def evaluate(model, train, validation, epochs, checkpointPath, infoPath):
+def evaluate(model: keras.engine.functional.Functional,
+			train: tensorflow.python.data.ops.dataset_ops.MapDataset,
+			validation: tensorflow.python.data.ops.dataset_ops.MapDataset,
+			epochs: int, checkpointPath: str, infoPath: str):
 	"""
 	Purpose: Fits a given model to a given data set
 	Parameters: The model (as a model object), training data (image dataset),
 				validation (image dataset), number of epochs to run (int),
 				where to save checkpoints (str of directory path), and where
 				to save loss/accuracy data (str of path to json)
-	Returns:
+	Returns: The fitted model
 	"""
+
+	# would try keras.engine.functional.Functional as return hint but didn't get chance to check
+
 	cpCallback = tf.keras.callbacks.ModelCheckpoint(filepath = checkpointPath,
 													save_weights_only = True,
 													verbose = 1)
