@@ -125,12 +125,12 @@ def evaluate(model: keras.engine.functional.Functional,
 	return history
 
 def main():
-
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-l", "--load", required=False, help="Path to load save")
 	ap.add_argument("-n", "--save", required=False, help="Path to where to save model")
 	ap.add_argument("-p", "--data", required=True, help="Path to where to save model info")
 	ap.add_argument("-e", "--epochs", required=True, help="Number of epochs for model to run")
+	ap.add_argument("-m", "--modelPath", required=False, help="Model save path")
 	args = vars(ap.parse_args())
 
 	infoPath = args["data"]
@@ -158,6 +158,7 @@ def main():
 
 	checkpoint = Checkpoint(model)
 
+	# load previous weights if they exist
 	if args["load"] != None:
 		checkpointPath = args["load"]
 		checkpointDir = os.path.dirname(checkpointPath)
@@ -165,10 +166,17 @@ def main():
 
 		checkpoint.restore(checkpointPath)
 		model.load_weights(checkpointPath)
+
+	# if not creates a new save
 	else:
 		checkpointPath = args["save"]
 
 	history = evaluate(model, train, validation, epochs, checkpointPath, infoPath)
+
+	# saving model itself
+	if args["modelPath"] is not None:
+		print(f"Saving model to {args['modelPath']}")
+		model.save(args["modelPath"])
 
 
 main()
